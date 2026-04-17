@@ -195,8 +195,9 @@ def render_frontend_table(df, key, column_config=None, filename=None):
     expand_key = f"{key}_expand"
     summary_key = f"{key}_summary"
 
-    toolbar_col1, toolbar_col2, _ = st.columns([1, 1, 6])
-    with toolbar_col1:
+    _, col_download, col_expand = st.columns([6, 1, 1])
+
+    with col_download:
         st.download_button(
             label="⬇️",
             data=df.to_csv(index=False).encode("utf-8"),
@@ -204,12 +205,13 @@ def render_frontend_table(df, key, column_config=None, filename=None):
             mime="text/csv",
             key=f"{key}_download",
         )
-    with toolbar_col2:
+
+    with col_expand:
         if st.button("🔍", key=f"{key}_expand_button"):
             st.session_state[expand_key] = not st.session_state.get(expand_key, False)
 
     is_expanded = st.session_state.get(expand_key, False)
-    table_height = 600 if is_expanded else "content"
+
     if is_expanded:
         st.write("### Fullscreen View")
 
@@ -219,18 +221,20 @@ def render_frontend_table(df, key, column_config=None, filename=None):
         hide_index=True,
         column_config=column_config,
         key=key,
-        height=table_height,
+        height=600 if is_expanded else "content",
     )
 
     with st.expander("⋯ More options"):
         st.write(f"Rows: {len(df):,} | Columns: {len(df.columns):,}")
+
         if st.button("Show summary", key=f"{key}_summary_button"):
             st.session_state[summary_key] = not st.session_state.get(summary_key, False)
+
         if st.session_state.get(summary_key, False):
-            st.dataframe(
+            render_frontend_table(
                 df.describe(include="all").fillna(""),
-                use_container_width=True,
                 key=f"{key}_summary_table",
+                filename=f"{key}_summary.csv",
             )
 
 
