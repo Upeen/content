@@ -208,8 +208,9 @@ def render_frontend_table(df, key, column_config=None, filename=None):
         if st.button("🔍", key=f"{key}_expand_button"):
             st.session_state[expand_key] = not st.session_state.get(expand_key, False)
 
-    table_height = 600 if st.session_state.get(expand_key, False) else None
-    if st.session_state.get(expand_key, False):
+    is_expanded = st.session_state.get(expand_key, False)
+    table_height = 600 if is_expanded else "content"
+    if is_expanded:
         st.write("### Fullscreen View")
 
     st.dataframe(
